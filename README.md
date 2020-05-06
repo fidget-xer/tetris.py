@@ -13,3 +13,9 @@ $ python3 ./tetris.py
 dependecies:
 <br>
 pygame (pip install pygame)
+<br>
+Contributions:
+<br>
+It would be awesome if anyone would contribute to this silly project.
+<br>
+If you want to contribute, you can, anything goes, break my game, anything.
