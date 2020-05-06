@@ -1,27 +1,240 @@
 #!/bin/python3
 import pygame
 import sys
-import rect_array
-import colors
-import random_piece_gen
 import copy
 import math
 import random
-import settings
-import move_down
+
+
+x,y = 2, 2
+width, height = 5, 5
+
+arr = [copy.deepcopy([False for x in range(width)]) for y in range(height)]
+forms = [
+        [
+            [0,1,1,0,0],
+            [0,1,0,0,0],
+            [0,1,0,0,0],
+            [0,1,0,0,0],
+            [0,0,0,0,0],
+        ],[
+            [0,1,1,0,0],
+            [0,1,1,0,0],
+            [0,1,0,0,0],
+            [0,1,0,0,0],
+            [0,0,0,0,0],
+        ],[
+            [0,1,1,0,0],
+            [0,1,1,0,0],
+            [0,1,1,0,0],
+            [0,1,0,0,0],
+            [0,0,0,0,0],
+        ],[
+            [0,1,1,1,0],
+            [0,1,1,0,0],
+            [0,1,1,0,0],
+            [0,1,0,0,0],
+            [0,0,0,0,0],
+        ],[
+            [0,1,1,1,0],
+            [0,1,1,0,0],
+            [0,1,1,0,0],
+            [0,1,1,0,0],
+            [0,0,0,0,0],
+        ],[
+            [0,1,1,1,0],
+            [0,1,1,0,0],
+            [0,0,1,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+        ],[
+            [0,1,1,1,0],
+            [0,1,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+        ],[
+            [0,1,1,1,0],
+            [0,1,0,0,0],
+            [0,1,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+        ],[
+            [0,1,1,1,0],
+            [1,1,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+        ],[
+            [0,1,1,1,0],
+            [1,1,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+        ],[
+            [1,1,1,1,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+            [0,0,0,0,0],
+        ]
+        ]
+
+
+def choose_form(forms):
+    return forms[random.randint(0,len(forms)-1)]
+
+
+def side_gen(side, arr, index):
+    if random.randint(1,250) > 30:
+        # 0=left
+        # 1=right
+        # 2=up
+        # 3=down
+        if side == 0 and index['x'] > 0:
+            arr[index['y']][index['x'] - 1] = True
+            index['x'] -= 1
+            return arr, index
+        if side == 1 and index['x'] < len(arr[index['y']]) - 1:
+            arr[index['y']][index['x'] + 1] = True
+            index['x'] += 1
+            return arr, index
+        if side == 2 and index['y'] > 0:
+            arr[index['y'] - 1][index['x']] = True
+            index['y'] -= 1
+            return arr, index
+        if side == 3 and index['y'] < len(arr) - 1:
+            arr[index['y'] + 1][index['x']] = True
+            index['y'] += 1
+            return arr, index
+    return arr, index
+
+count = 0
+
+def rec_side_gen(arr, index):
+    global count
+    for side in range(4):
+        if random.randint(0,120) > 13:
+            arr, index2 = side_gen(side, arr, index)
+            if count < 8:
+                count += 1
+                arr2 = rec_side_gen(arr, index2)
+                for y in range(len(arr2)):
+                    for x in range(len(arr2[y])):
+                        if arr2[y][x]:
+                            arr[y][x] = True
+    return arr
+
+def random_piece_gen():
+    global arr,x,y,forms
+    '''
+    arr = [copy.deepcopy([False for x in range(width)]) for y in range(height)]
+    arr[y][x] = True
+    arr = rec_side_gen(arr, {'x':x,'y':y})
+    '''
+    arr = copy.deepcopy(choose_form(forms))
+    return arr
+
+def move_down(fall, keys, check_floor):
+    if keys['s']:
+        if check_floor():
+            fall()
+
+width = 400
+height = 600
+block_size = 20
+fps = 25
+
+colors = {
+        'lightblue':[100,200,200],
+        'white':[255,255,255],
+        'blue':[0,30,200],
+        'red':[200,30,20],
+        'green':[5,190,20],
+        'black':[0,0,0],
+        'random':[255,255,255],
+        'bluegreen':[0,255,255],
+        'redblue':[255,0,255],
+        }
+
+def random_255(minimum, maximum):
+    return random.randint(minimum, maximum)
+
+def gen_random_color(color):
+    global colors
+    colors[color] = []
+    if 'red' in color or color == random:
+        colors[color].append(random_255(180, 255))
+    else:
+        colors[color].append(random_255(0,120))
+    if 'green' in color or color == random:
+        colors[color].append(random_255(180, 255))
+    else:
+        colors[color].append(random_255(0,120))
+    if 'blue' in color or color == random:
+        colors[color].append(random_255(180, 255))
+    else:
+        colors[color].append(random_255(0,120))
+
+
+def gen_random_color_all():
+    gen_random_color('blue')
+    gen_random_color('red')
+    gen_random_color('green')
+    gen_random_color('redblue')
+    gen_random_color('bluegreen')
+    gen_random_color('random')
+
+
+gen_random_color_all()
+
+def array2d_init(width, height, val):
+    return [copy.deepcopy([copy.deepcopy(val) for x in range(width)]) for y in range(height)]
+
+
+def index_wh(screen_width, screen_height, rect_width, rect_height):
+    index_width = int(screen_width / rect_width)
+    index_height = int(screen_height / rect_height)
+    return index_width, index_height
+
+
+class array2d:
+    def init(self, screen_width, screen_height, rect_width, rect_height):
+        self.index_width, self.index_height = index_wh(screen_width, screen_height, rect_width, rect_height)
+    def make(self, inner):
+        self.array2d = array2d_init(self.index_width, self.index_height, inner)
+
+
+class rect_array2d(array2d):
+    def __init__(self, screen_width, screen_height, rect_width, rect_height):
+        self.init(screen_width, screen_height, rect_width, rect_height)
+        inner = [0 for x in range(4)]
+        self.make(inner)
+        for y in range(self.index_height):
+            for x in range(self.index_width):
+                self.array2d[y][x][0] = rect_width * x# x
+                self.array2d[y][x][1] = rect_height * y# y
+                self.array2d[y][x][2] = rect_width# width
+                self.array2d[y][x][3] = rect_height# height
+
+
+class data_array2d(array2d):
+    def __init__(self, screen_width, screen_height, rect_width, rect_height):
+        self.init(screen_width, screen_height, rect_width, rect_height)
+        inner = 'black'
+        self.make(inner)
 
 pygame.init()
 
-size = width, height = settings.width, settings.height
-block_size = settings.block_size
+size = width, height
 
 screen = pygame.display.set_mode(size)
 clock = pygame.time.Clock()
 
 keys = {'up':False,'down':False,'left':False,'right':False,'a':False,'d':False, 'e':False, 'q':False, 's':False}
 
-rect2d = rect_array.rect_array2d(width, height, block_size, block_size)
-data2d = rect_array.data_array2d(width, height, block_size, block_size)
+rect2d = rect_array2d(width, height, block_size, block_size)
+data2d = data_array2d(width, height, block_size, block_size)
 
 
 fallenX = []
@@ -38,7 +251,7 @@ colorNumArr = [x for x in range(5)]
 
 def rand_color():
     global color, colorNumArr
-    colors.gen_random_color_all()
+    gen_random_color_all()
     numIndex = random.randint(0,len(colorNumArr) - 1)
     num = colorNumArr[numIndex]
     del colorNumArr[numIndex]
@@ -371,7 +584,7 @@ def check_floor_custom():
     return check_floor(xArr, yArr) and check_comlex_floorArr(xArr, yArr, fallenX, fallenY, 1)
 
 while True:
-    clock.tick(settings.fps)
+    clock.tick(fps)
     if piece_spawn:
         xLim = 0
         xMov = False
@@ -380,11 +593,11 @@ while True:
             if check_game_over(yArr):
                 game_over = True
                 print(score)
-            colorArr.append(copy.deepcopy(colors.colors[color]))
+            colorArr.append(copy.deepcopy(colors[color]))
             rand_color()
             fallenX.append(copy.deepcopy(xArr))
             fallenY.append(copy.deepcopy(yArr))
-        array2dBool = random_piece_gen.test()
+        array2dBool = random_piece_gen()
         from_array2dBool(array2dBool)
         piece_spawn = False
     for event in pygame.event.get():
@@ -398,11 +611,11 @@ while True:
         continue
     passes['count'] += 1
     blacken_data()
-    make_data(xArr, yArr, colors.colors[color])
+    make_data(xArr, yArr, colors[color])
     make_datas(fallenX, fallenY, colorArr)
     draw_from_data()
     pygame.display.flip()
-    screen.fill(colors.colors['black'])
+    screen.fill(colors['black'])
     localXArr = copy.deepcopy(xArr)
     localYArr = copy.deepcopy(yArr)
     if passes['count'] >= passes['limit']:
@@ -425,7 +638,7 @@ while True:
         piece_spawn = True
     localXArr = copy.deepcopy(xArr)
     localYArr = copy.deepcopy(yArr)
-    move_down.move_down(fall_custom, keys,check_floor_custom)
+    move_down(fall_custom, keys,check_floor_custom)
     if not check_comlex_floorArr(xArr, yArr, fallenX, fallenY, 0) or not check_floor(xArr, yArr):
         xArr = copy.deepcopy(localXArr)
         yArr = copy.deepcopy(localYArr)
